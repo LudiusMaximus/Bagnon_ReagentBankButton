@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80205
 ## Title: Bagnon ReagentBankButton
 ## Author: LudiusMaximus
 ## Notes: A simple Bagnon plugin that displays |nan extra menu button to toggle |nthe reagent bank.
