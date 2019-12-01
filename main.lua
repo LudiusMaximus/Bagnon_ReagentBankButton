@@ -94,6 +94,7 @@ function ReagentbankToggle:Update()
 
   local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
   -- Unfortunately, LibItemCache-2.0 does not yet allow to check 'owned' status of cached bags.
+  -- TODO: https://github.com/Jaliborc/LibItemCache-2.0/issues/10#issuecomment-530950502
   -- So we assume cached bags as owned like the rest of Bagnon does.
   if reagentBagButton and reagentBagButton:IsPurchasable() then
   
