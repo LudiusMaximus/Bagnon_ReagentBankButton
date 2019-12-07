@@ -59,9 +59,10 @@ function ReagentbankToggle:OnEnter()
 
   GameTooltip:SetOwner(self, self:GetRight() > (GetScreenWidth() / 2) and 'ANCHOR_LEFT' or 'ANCHOR_RIGHT')
   GameTooltip:SetText(REAGENT_BANK)
+
   if reagentBagButton:IsPurchasable() then
-    GameTooltip:AddLine(L.TipPurchaseBag)
-    SetTooltipMoney(GameTooltip, reagentBagButton:GetCost())
+    GameTooltip:AddLine(L.TipPurchaseBag:format(L.Click))
+    SetTooltipMoney(GameTooltip, reagentBagButton:GetInfo().cost)
   else
     GameTooltip:AddLine((reagentBagButton:IsToggled() and L.TipHideBag or L.TipShowBag):format(L.LeftClick), 1,1,1)
     GameTooltip:AddLine(L.TipDepositReagents:format(L.RightClick), 1,1,1)
@@ -97,10 +98,10 @@ function ReagentbankToggle:Update()
   -- TODO: https://github.com/Jaliborc/LibItemCache-2.0/issues/10#issuecomment-530950502
   -- So we assume cached bags as owned like the rest of Bagnon does.
   if reagentBagButton and reagentBagButton:IsPurchasable() then
-  
+
     -- Remove the glow if this was still selected from another character.
     self:SetChecked(false)
-  
+
     self.BagnonReagentbankToggleTexture:SetVertexColor(1,0.1,0.1)
   else
     self.BagnonReagentbankToggleTexture:SetVertexColor(1,1,1)
@@ -123,7 +124,7 @@ end
 
 -- Append the reagent bank button to the menu button list.
 local AppendReagentBankToggle = function(self)
-  
+
   if self:GetName() == "BagnonFramebank" then
     tinsert(self.menuButtons, self.reagentbankToggle or self:CreateReagentbankToggle())
   end
@@ -134,15 +135,15 @@ local CreateBagFrameForReagentsbankToggle = function(self)
   if self:GetName() == "BagnonFramebank" and not self.bagFrame then
     self:CreateBagFrame()
   end
-  
-  
+
+
   -- Remove the glow if this was still selected from another character.
   local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
   if reagentBagButton and reagentBagButton:IsPurchasable() then
     reagentBagButton:SetChecked(false)
   end
-  
-  
+
+
 end
 
 Module.OnEnable = function(self)
