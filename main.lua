@@ -4,20 +4,20 @@ local L = LibStub('AceLocale-3.0'):GetLocale(ADDON)
 local Module = Bagnon:NewModule("ReagentBankButton", Addon)
 
 
-local ReagentbankToggle = Addon:NewClass('ReagentbankToggle', 'CheckButton')
+local ReagentbankToggle = Addon.Tipped:NewClass('ReagentbankToggle', 'CheckButton', true)
+
 
 --[[ Constructor ]]--
 
-function ReagentbankToggle:New(parent)
-  local b = self:Bind(CreateFrame('CheckButton', nil, parent, ADDON .. self.Name .. 'Template'))
-  b:SetScript('OnHide', b.UnregisterSignals)
+function ReagentbankToggle:New(...)
+  local b = self:Super(ReagentbankToggle):New(...)
+  b:SetScript('OnHide', b.UnregisterAll)
   b:SetScript('OnClick', b.OnClick)
   b:SetScript('OnEnter', b.OnEnter)
   b:SetScript('OnLeave', b.OnLeave)
   b:SetScript('OnShow', b.OnShow)
   b:RegisterForClicks('anyUp')
   b:Update()
-
   return b
 end
 
@@ -30,9 +30,10 @@ function ReagentbankToggle:OnShow()
   self:Update()
 end
 
+
 function ReagentbankToggle:OnClick(button)
   if button == 'LeftButton' then
-    local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
+    local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
     reagentBagButton:Click(button)
 
     -- The focus is only helpful if you have the reagent bank included in your
@@ -47,8 +48,10 @@ function ReagentbankToggle:OnClick(button)
   self:Update()
 end
 
+
 function ReagentbankToggle:OnEnter()
-  local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
+
+  local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
 
   -- The focus is only helpful if you have the reagent bank included in your
   -- normal bank. For an exclusive reagent bank it is anoying.
@@ -71,14 +74,17 @@ function ReagentbankToggle:OnEnter()
   GameTooltip:Show()
 end
 
+
 function ReagentbankToggle:OnLeave()
-  local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
+  local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
+
   reagentBagButton:SetFocus(false)
 
   if GameTooltip:IsOwned(self) then
     GameTooltip:Hide()
   end
 end
+
 
 
 --[[ API ]]--
@@ -93,7 +99,8 @@ end
 function ReagentbankToggle:Update()
   self:SetChecked(self:IsReagentbagShown())
 
-  local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
+  local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
+
   -- Unfortunately, LibItemCache-2.0 does not yet allow to check 'owned' status of cached bags.
   -- TODO: https://github.com/Jaliborc/LibItemCache-2.0/issues/10#issuecomment-530950502
   -- So we assume cached bags as owned like the rest of Bagnon does.
@@ -115,8 +122,6 @@ end
 
 
 
-
-
 function Addon.Frame:CreateReagentbankToggle()
   self.reagentbankToggle = Addon.ReagentbankToggle:New(self)
   return self.reagentbankToggle
@@ -125,28 +130,13 @@ end
 -- Append the reagent bank button to the menu button list.
 local AppendReagentBankToggle = function(self)
 
-  if self:GetName() == "BagnonFramebank" then
+  if self.frameID == 'bank' then
     tinsert(self.menuButtons, self.reagentbankToggle or self:CreateReagentbankToggle())
   end
-end
-
--- Must always create the bag frame, otherwise the tooltip for the reagent bag button will not work.
-local CreateBagFrameForReagentsbankToggle = function(self)
-  if self:GetName() == "BagnonFramebank" and not self.bagFrame then
-    self:CreateBagFrame()
-  end
-
-
-  -- Remove the glow if this was still selected from another character.
-  local reagentBagButton = _G[ADDON .. "Bag" .. REAGENTBANK_CONTAINER]
-  if reagentBagButton and reagentBagButton:IsPurchasable() then
-    reagentBagButton:SetChecked(false)
-  end
-
 
 end
 
-Module.OnEnable = function(self)
-  hooksecurefunc(Bagnon.Frame, "ListMenuButtons", AppendReagentBankToggle)
-  hooksecurefunc(Bagnon.Frame, "PlaceBagFrame", CreateBagFrameForReagentsbankToggle)
-end
+
+
+hooksecurefunc(Bagnon.Frame, "ListMenuButtons", AppendReagentBankToggle)
+
