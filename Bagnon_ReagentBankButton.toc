@@ -1,12 +1,13 @@
-## Interface: 80300
+## Interface: 90001
+## Version: @project-version@
 ## Title: Bagnon ReagentBankButton
 ## Author: LudiusMaximus
 ## Notes: A simple Bagnon plugin that displays |nan extra menu button to toggle |nthe reagent bank.
 ## RequiredDeps: Bagnon
-## Version: 1.8
+## X-Curse-Project-ID: 306127
+## X-WoWI-ID: 24852
 ## X-Donate: PayPal:ludiusmaximus@gmail.com
 ## X-License: The MIT License (MIT)
-## X-Category: Inventory
 
 main.lua
 style.xml
