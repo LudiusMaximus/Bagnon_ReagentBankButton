@@ -1,7 +1,5 @@
-local MODULE =  ...
-local ADDON, Addon = MODULE:match("[^_]+"), _G[MODULE:match("[^_]+")]
-local L = LibStub('AceLocale-3.0'):GetLocale(ADDON)
-local Module = Bagnon:NewModule("ReagentBankButton", Addon)
+local Addon = Bagnon
+local L = LibStub('AceLocale-3.0'):GetLocale("Bagnon")
 
 
 local ReagentbankToggle = Addon.Tipped:NewClass('ReagentbankToggle', 'CheckButton', true)
@@ -101,17 +99,22 @@ function ReagentbankToggle:Update()
 
   local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
 
-  -- Unfortunately, LibItemCache-2.0 does not yet allow to check 'owned' status of cached bags.
-  -- TODO: https://github.com/Jaliborc/LibItemCache-2.0/issues/10#issuecomment-530950502
-  -- So we assume cached bags as owned like the rest of Bagnon does.
-  if reagentBagButton and reagentBagButton:IsPurchasable() then
+  if reagentBagButton and not reagentBagButton:GetInfo().owned then
 
-    -- Remove the glow if this was still selected from another character.
-    self:SetChecked(false)
+    -- If the reagent button was still toggled from watching another character
+    -- (both the current and the last watched character having "Character Specific Settings" disabled)
+    -- we switch automatically to the normal bank view.
+    if self:GetChecked() then
+        -- Toggle the bank button.
+        Addon.Bag(self:GetParent(), BANK_CONTAINER):OnClick('LeftButton')
+        Addon.Bag(self:GetParent(), BANK_CONTAINER):OnLeave()
+    end
 
-    self.BagnonReagentbankToggleTexture:SetVertexColor(1,0.1,0.1)
+    SetItemButtonTextureVertexColor(self, 1,0.1,0.1)
+    -- self:GetNormalTexture():SetVertexColor(1,0.1,0.1)
   else
-    self.BagnonReagentbankToggleTexture:SetVertexColor(1,1,1)
+    SetItemButtonTextureVertexColor(self, 1,1,1)
+    -- self:GetNormalTexture():SetVertexColor(1,1,1)
   end
 end
 
@@ -135,7 +138,6 @@ local AppendReagentBankToggle = function(self)
   end
 
 end
-
 
 
 hooksecurefunc(Bagnon.Frame, "ListMenuButtons", AppendReagentBankToggle)
