@@ -30,8 +30,10 @@ end
 
 
 function ReagentbankToggle:OnClick(button)
+  
+  local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
+  
   if button == 'LeftButton' then
-    local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
     reagentBagButton:Click(button)
 
     -- The focus is only helpful if you have the reagent bank included in your
@@ -40,8 +42,13 @@ function ReagentbankToggle:OnClick(button)
     if profile.exclusiveReagent then
       reagentBagButton:SetFocus(false)
     end
+    
   else
-    DepositReagentBank()
+    -- Deposit is only executed when you are looking at the bank of the currently logged in character.
+    if not reagentBagButton:IsCached() then
+      DepositReagentBank()
+    end
+    
   end
   self:Update()
 end
@@ -61,13 +68,21 @@ function ReagentbankToggle:OnEnter()
   GameTooltip:SetOwner(self, self:GetRight() > (GetScreenWidth() / 2) and 'ANCHOR_LEFT' or 'ANCHOR_RIGHT')
   GameTooltip:SetText(REAGENT_BANK)
 
-  if reagentBagButton:IsPurchasable() then
+
+  -- If reagent bank is purchasable.
+  if not reagentBagButton.owned and not reagentBagButton:IsCached() then
     GameTooltip:AddLine(L.TipPurchaseBag:format(L.Click))
-    SetTooltipMoney(GameTooltip, reagentBagButton:GetInfo().cost)
+    SetTooltipMoney(GameTooltip, GetReagentBankCost())
   else
-    GameTooltip:AddLine((reagentBagButton:IsToggled() and L.TipHideBag or L.TipShowBag):format(L.LeftClick), 1,1,1)
-    GameTooltip:AddLine(L.TipDepositReagents:format(L.RightClick), 1,1,1)
+  
+    GameTooltip:AddLine((profile.hiddenBags[REAGENTBANK_CONTAINER] and L.TipShowBag or L.TipHideBag):format(L.LeftClick), 1,1,1)
+    
+    -- Deposit is only executed when you are looking at the bank of the currently logged in character.
+    if not reagentBagButton:IsCached() then
+      GameTooltip:AddLine(L.TipDepositReagents:format(L.RightClick), 1,1,1)
+    end
   end
+
 
   GameTooltip:Show()
 end
@@ -99,7 +114,7 @@ function ReagentbankToggle:Update()
 
   local reagentBagButton = Addon.Bag(self:GetParent(), REAGENTBANK_CONTAINER)
 
-  if reagentBagButton and not reagentBagButton:GetInfo().owned then
+  if reagentBagButton and not reagentBagButton.owned then
 
     -- If the reagent button was still toggled from watching another character
     -- (both the current and the last watched character having "Character Specific Settings" disabled)
@@ -133,7 +148,7 @@ end
 -- Append the reagent bank button to the menu button list.
 local AppendReagentBankToggle = function(self)
 
-  if self.frameID == 'bank' then
+  if self.id == 'bank' then
     tinsert(self.menuButtons, self.reagentbankToggle or self:CreateReagentbankToggle())
   end
 
